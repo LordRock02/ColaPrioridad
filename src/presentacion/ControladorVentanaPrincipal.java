@@ -31,7 +31,7 @@ public class ControladorVentanaPrincipal implements ActionListener {
                 ventana.getModelo().iniciarAtencion();
                 ventana.getModelo().iniciarPintarCola();
                 ventana.getModelo().iniciarPintarTabla();
-                //ventana.getModelo().iniciarDiagramaGantt();
+                ventana.getModelo().iniciarDiagramaGantt();
                 ventana.getModelo().iniciarAtencionBloqueados();
 
                 if(boton.getText().equals("INICIAR")){

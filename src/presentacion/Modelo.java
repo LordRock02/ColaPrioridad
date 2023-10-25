@@ -28,7 +28,6 @@ public class Modelo implements Cloneable{
     private ListaOrdenada listaOrdenadaTurnos = new ListaOrdenada();
     private Lista listaOrdenadaBloqueados = new Lista();
 
-    private ArrayList<Object[]> procesosIngresados = new ArrayList<Object[]>();
     private ArrayList<Proceso> procesosTabla = new ArrayList<>();
     private VentanaPrincipal ventanaPrincipal;
     private Proceso procesoActual;
@@ -90,6 +89,7 @@ public class Modelo implements Cloneable{
         for(int i=0;i<cantClientes;i++){
             this.listaOrdenadaTurnos.insertar();
             listaOrdenadaTurnos.getUltimoAgregado().setTiempoLlegada(0);
+            listaOrdenadaTurnos.getUltimoAgregado().setEstado("Listo");
             insertarTabla(listaOrdenadaTurnos.getUltimoAgregado());
         }
         this.pintarTabla();
@@ -112,7 +112,7 @@ public class Modelo implements Cloneable{
                     }
 
                     //Proceso de atención
-                    Proceso procesoActual = listaOrdenadaTurnos.getProcesoCajero().getSiguiente();
+                    procesoActual = listaOrdenadaTurnos.getProcesoCajero().getSiguiente();
                     procesoActual.setEstado("En ejecución");
                     actualizarTabla(procesoActual);
                     System.out.println("\nLista a atender: ");
@@ -409,32 +409,33 @@ public class Modelo implements Cloneable{
         model = new TaskSeriesCollection();
         final TaskSeries s = new TaskSeries("");
         //System.out.println("tamano :"+s.getTasks().size());
-        for(int i=0; i<procesosIngresados.size(); i++){
+        for(int i=0; i<procesosTabla.size(); i++){
             //System.out.println("proceso :" + procesosIngresados.get(i)[0] + " estado: " + procesosIngresados.get(i)[7]);
         }
         if(procesoActual!=null){
-            for(int i=0; i<procesosIngresados.size(); i++){
-                if(procesosIngresados.get(i)[7]=="esperando"){
-                    final Task t = new Task(""+procesosIngresados.get(i)[0], new SimpleTimePeriod((int)procesosIngresados.get(i)[1], contadorReloj));
-                    final Task t1 = new Task("esperando", new SimpleTimePeriod((int)procesosIngresados.get(i)[1], contadorReloj));
+            for(int i=0; i<procesosTabla.size(); i++){
+                System.out.println(procesosTabla.get(i).getNombreProceso() + " " + procesosTabla.get(i).getEstado());
+                if(procesosTabla.get(i).getEstado()=="Listo"){
+                    final Task t = new Task(""+procesosTabla.get(i).getNombreProceso(), new SimpleTimePeriod(procesosTabla.get(i).getTiempoLlegada(), contadorReloj));
+                    final Task t1 = new Task("esperando", new SimpleTimePeriod(procesosTabla.get(i).getTiempoLlegada(), contadorReloj));
                     final Task t2 = new Task("ejecutando", new SimpleTimePeriod(0, 0));
                     t.addSubtask(t1);
                     t.addSubtask(t2);
                     s.add(t);
                 }
-                if(procesosIngresados.get(i)[7]=="ejecutando"){
+                if(procesosTabla.get(i).getEstado()=="En ejecución"){
                     //System.out.println("Pintando proceso en ejecucion");
-                    final Task t = new Task(""+procesosIngresados.get(i)[0], new SimpleTimePeriod((int)procesosIngresados.get(i)[1], contadorReloj));
-                    final Task t1 = new Task("esperando", new SimpleTimePeriod((int)procesosIngresados.get(i)[1],(int)procesosIngresados.get(i)[3]));
-                    final Task t2 = new Task("ejecutando", new SimpleTimePeriod((int)procesosIngresados.get(i)[3], contadorReloj));
+                    final Task t = new Task(""+procesosTabla.get(i).getNombreProceso(), new SimpleTimePeriod(procesosTabla.get(i).getTiempoLlegada(), contadorReloj));
+                    final Task t1 = new Task("esperando", new SimpleTimePeriod(procesosTabla.get(i).getTiempoLlegada(), procesosTabla.get(i).getTiempoComienzo()));
+                    final Task t2 = new Task("ejecutando", new SimpleTimePeriod(procesosTabla.get(i).getTiempoComienzo(), contadorReloj));
                     t.addSubtask(t1);
                     t.addSubtask(t2);
                     s.add(t);
                 }
-               if(procesosIngresados.get(i)[7]=="terminado"){
-                    final Task t = new Task(""+procesosIngresados.get(i)[0], new SimpleTimePeriod((int)procesosIngresados.get(i)[1], contadorReloj));
-                    final Task t1 = new Task("esperando", new SimpleTimePeriod((int)procesosIngresados.get(i)[1],(int)procesosIngresados.get(i)[3]));
-                    final Task t2 = new Task("ejecutando", new SimpleTimePeriod((int)procesosIngresados.get(i)[3], (int)procesosIngresados.get(i)[4]));
+               if(procesosTabla.get(i).getEstado()=="Terminado"){
+                    final Task t = new Task(""+procesosTabla.get(i).getNombreProceso(), new SimpleTimePeriod(procesosTabla.get(i).getTiempoLlegada(), contadorReloj));
+                    final Task t1 = new Task("esperando", new SimpleTimePeriod(procesosTabla.get(i).getTiempoLlegada(),procesosTabla.get(i).getTiempoComienzo()));
+                    final Task t2 = new Task("ejecutando", new SimpleTimePeriod(procesosTabla.get(i).getTiempoComienzo(), procesosTabla.get(i).getTiempoFinal()));
                     t.addSubtask(t1);
                     t.addSubtask(t2);
                     s.add(t);
@@ -462,11 +463,4 @@ public class Modelo implements Cloneable{
         return ventanaPrincipal;
     }
 
-    public ArrayList<Object[]> getProcesosIngresados() {
-        return procesosIngresados;
-    }
-
-    public void setProcesosIngresados(ArrayList<Object[]> procesosIngresados) {
-        this.procesosIngresados = procesosIngresados;
-    }
 }
