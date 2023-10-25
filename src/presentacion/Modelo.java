@@ -394,7 +394,7 @@ public class Modelo implements Cloneable{
         final CategoryPlot plot = (CategoryPlot) chart.getPlot();
         DateAxis range = (DateAxis) plot.getRangeAxis();
         range.setDateFormatOverride(new SimpleDateFormat("S"));
-        range.setMaximumDate(new Date(100));
+        range.setMaximumDate(new Date(100 + (contadorReloj/100)*100));
 
         // insertando diagrama de gantt al panel
         getVistaPrincipal().getChartPanel().setChart(chart);
